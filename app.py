@@ -9,6 +9,7 @@ el código como búsquedas en tiendas reales del país elegido.
 import re
 from urllib.parse import quote, quote_plus
 
+import httpx
 import streamlit as st
 from google import genai
 from google.genai import errors, types
@@ -17,8 +18,17 @@ from pydantic import BaseModel, Field
 # --------------------------------------------------------------------------
 # Configuración
 # --------------------------------------------------------------------------
-MODELO = "gemini-3.8-flash"
-MODELO_RESERVA = "gemini-3.5-flash-lite"  # se usa solo si el principal falla por cuota
+# Modelos en orden de preferencia: (nombre, nivel de razonamiento o None).
+# Medido con la clave gratuita el 04/11/2026 (torre para jugar, 1200 €):
+#   gemini-3.5-flash (razonamiento bajo) ~6 s y aprovecha bien el presupuesto;
+#   gemini-3.1-flash-lite ~5 s; gemini-3.5-flash-lite ~14 s;
+#   gemini-3.8-flash daba 503 (saturado) y llegó a tardar 68 s en fallar.
+MODELOS = [
+    ("gemini-3.5-flash", "low"),
+    ("gemini-3.1-flash-lite", None),
+    ("gemini-3.5-flash-lite", None),
+]
+TIEMPO_MAXIMO_MS = 30_000  # si un modelo tarda más de 30 s, se pasa al siguiente
 MAX_CARACTERES = 600
 
 TITULO = "🖥️ Asesor de PC"
@@ -85,6 +95,10 @@ EJEMPLOS = {
     "🎨 Diseño": "Soy estudiante de diseño gráfico: uso Photoshop, Illustrator y estoy empezando con Blender.",
     "👵 Casa": "Para una persona mayor: navegar, ver vídeos, videollamadas con la familia y algo de ofimática. Que sea silencioso y fácil.",
     "💻 Programar": "Programar, tener muchas pestañas abiertas, Docker y alguna máquina virtual. Lo llevaré a clase.",
+    "🤖 IA local": (
+        "Quiero ejecutar modelos de IA (LLM) en mi propio ordenador con Ollama o LM Studio, "
+        "como Llama, Qwen o Mistral de 7 a 14B, y montar agentes que me ayuden a programar sin depender de la nube."
+    ),
 }
 
 SYSTEM_PROMPT = """
@@ -123,6 +137,16 @@ Reglas:
 7. "resumen": 2 o 3 frases explicando la idea general de la propuesta para ese uso.
    "consejos": de 2 a 4 consejos prácticos y breves (ej. qué mejorar en el futuro,
    si hace falta comprar Windows, qué revisar antes de comprar).
+8. IA local (ejecutar LLM o agentes en el propio ordenador con Ollama, LM Studio, llama.cpp...):
+   lo que más importa es la memoria de la tarjeta gráfica (VRAM), porque el modelo tiene que
+   caber en ella. Prioriza una gráfica NVIDIA (CUDA es lo más compatible) con la mayor VRAM que
+   permita el presupuesto: 12 GB como mínimo razonable, 16 GB o más para modelos de 14B o más.
+   Gasta en la gráfica antes que en el procesador. Pon al menos 32 GB de RAM (64 GB si sobra
+   presupuesto), un SSD NVMe de 1-2 TB (los modelos ocupan mucho) y una fuente con margen.
+   En "resumen" o "consejos" di, de forma sencilla, qué tamaño de modelo podrá mover
+   (ej. "modelos de hasta 14B cuantizados a 4 bits"). En portátil, busca la gráfica con más VRAM;
+   si el presupuesto lo permite, menciona que un Mac con chip M y mucha memoria unificada
+   también es una opción.
 """
 
 
@@ -194,7 +218,7 @@ def mensaje_de_error(error: Exception) -> str:
                 "Si eres quien gestiona la app, revisa GEMINI_API_KEY en los secretos.")
     if codigo == 404:
         return "El modelo de IA configurado ya no está disponible. Hay que actualizar el nombre del modelo en la app."
-    if codigo in (500, 502, 503, 504):
+    if codigo in (500, 502, 503, 504) or isinstance(error, httpx.TimeoutException):
         return "El servicio de IA está saturado o caído en este momento. Inténtalo de nuevo en unos minutos."
     if isinstance(error, ValueError):
         return "La IA ha devuelto una respuesta que no he podido leer. Vuelve a pulsar el botón, suele arreglarse."
@@ -220,26 +244,32 @@ def _leer_respuesta(respuesta) -> dict:
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def pedir_recomendacion(api_key: str, peticion: str) -> tuple[dict, str]:
-    """Pide la recomendación a Gemini. Si el modelo principal falla por cuota o
-    saturación, lo intenta una vez con el modelo de reserva. Las respuestas se
-    guardan una hora para no gastar cuota si alguien repite la misma consulta."""
+    """Pide la recomendación a Gemini probando los modelos de MODELOS en orden.
+    Si uno falla por cuota (429), saturación (5xx), modelo retirado (404) o tarda
+    más de TIEMPO_MAXIMO_MS, pasa al siguiente. Las respuestas se guardan una hora
+    para no gastar cuota si alguien repite la misma consulta."""
     cliente = obtener_cliente(api_key)
-    config = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
-        response_mime_type="application/json",
-        response_schema=Recomendacion,
-        temperature=0.4,
-    )
     ultimo_error: Exception | None = None
-    for modelo in (MODELO, MODELO_RESERVA):
+    for modelo, razonamiento in MODELOS:
+        config = types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            response_mime_type="application/json",
+            response_schema=Recomendacion,
+            temperature=0.4,
+            http_options=types.HttpOptions(timeout=TIEMPO_MAXIMO_MS),
+            thinking_config=types.ThinkingConfig(thinking_level=razonamiento) if razonamiento else None,
+        )
         try:
             respuesta = cliente.models.generate_content(model=modelo, contents=peticion, config=config)
             return _leer_respuesta(respuesta), modelo
         except errors.APIError as error:
-            if error.code in (429, 404, 500, 503):
+            if error.code in (429, 404, 500, 502, 503, 504):
                 ultimo_error = error
-                continue  # probamos con el modelo de reserva
+                continue  # probamos con el siguiente modelo
             raise
+        except httpx.TimeoutException as error:
+            ultimo_error = error
+            continue
     raise ultimo_error
 
 
