@@ -15,7 +15,7 @@
 ## En cinco frases
 
 1. Quien no entiende de informática y necesita un ordenador depende del amigo "que sabe", de foros llenos de siglas o del dependiente de turno, y suele acabar pagando de más o quedándose corto.
-2. AsesorPCs le pregunta para qué lo quiere, cuánto puede gastar y en qué país lo comprará, y le devuelve una torre pieza a pieza o dos o tres portátiles, con el motivo de cada elección y botones para buscarlos en tiendas locales.
+2. AsesorPCs le pregunta para qué lo quiere, cuánto puede gastar y en qué país lo comprará, y le devuelve una torre pieza a pieza, una torre ya montada o dos o tres portátiles, con el porqué de cada elección, un rango de precio y botones para buscarlos en tiendas locales.
 3. La IA hace lo que ningún filtro de tienda puede hacer: convierte una frase como "quiero mover modelos de IA en local" en una configuración compatible y ajustada al presupuesto (en ese caso, priorizando una gráfica con 16 GB de VRAM), explicada sin jerga.
 4. Marc, un compañero de trabajo, la usó desde el móvil para elegir un portátil de oficina y le sirvió para orientarse, pero en la tienda el precio era bastante más alto que el de la app. Al comparar con PcComponentes vi que la IA se quedaba entre un 25 % y un 50 % por debajo, así que calibré el prompt con precios reales y añadí un rango ("habitual – máximo"): ahora el desfase es de entre un 0 % y un 10 %.
 5. Lo siguiente sería leer el precio real de cada tienda en el momento (con sus APIs de afiliados o la búsqueda de Google de Gemini, que no entra en la capa gratuita) y añadir un botón para compartir la propuesta por WhatsApp o correo, que fue la otra petición de Marc. El precio en vivo marca la diferencia: el Ryzen 5 5600X que la IA estimó en 140 € costaba ese día 177,48 €.
