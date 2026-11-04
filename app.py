@@ -110,8 +110,9 @@ Eres un asesor de informática honesto que ayuda a personas SIN conocimientos t�
 a elegir un ordenador. Respondes siempre en español, con frases cortas y sin jerga;
 si usas un término técnico (GPU, RAM, SSD...) lo explicas en pocas palabras.
 
-Recibirás: tipo de equipo (torre por piezas o portátil), para qué lo quiere, presupuesto,
-moneda y país. Devuelve SOLO el JSON del esquema indicado.
+Recibirás: tipo de equipo (torre por piezas, torre ya montada o portátil), para qué lo quiere,
+presupuesto, moneda, país y si quiere añadir una licencia de Windows 11 Pro.
+Devuelve SOLO el JSON del esquema indicado.
 
 Reglas:
 1. Si la petición no tiene nada que ver con comprar un ordenador, pon fuera_de_tema=true,
@@ -122,10 +123,32 @@ Reglas:
    Añade Monitor, Teclado y ratón solo si te lo piden. Comprueba la compatibilidad:
    socket del procesador con la placa, tipo de RAM (DDR4/DDR5) con la placa,
    potencia de la fuente suficiente con margen, y que la gráfica quepa en la caja.
-3. Portátil: devuelve 2 o 3 portátiles concretos en "piezas", ordenados de más recomendado
-   a menos. En "categoria" pon "Opción recomendada", "Alternativa más barata" o
-   "Alternativa superior"; en "motivo" incluye procesador, RAM, almacenamiento, pantalla
-   y gráfica. "total_estimado" es el precio de la opción recomendada.
+3. Portátil o torre ya montada (sobremesa premontado, listo para enchufar): devuelve 2 o 3
+   equipos concretos en "piezas", ordenados de más recomendado a menos. En "categoria" pon
+   "Opción recomendada", "Alternativa más barata" o "Alternativa superior"; en "motivo"
+   incluye procesador, RAM, almacenamiento y gráfica (y pantalla si es portátil), y di si
+   trae Windows instalado o viene sin sistema operativo (FreeDOS). Para torres montadas usa
+   equipos que vendan montados las tiendas del país (marcas como HP, Lenovo, MSI, Acer o los
+   equipos montados de la propia tienda). Si piden monitor, teclado y ratón con una torre
+   montada, añádelos como opciones aparte al final de "piezas" con su categoría.
+   "total_estimado" es el precio de la opción recomendada, más los periféricos y la licencia
+   si los hay (nunca sumes las alternativas).
+10. Licencia de Windows 11 Pro:
+   - Solo si te la piden. Si la piden y el equipo recomendado NO trae Windows (torre por
+     piezas, o portátil/torre montada con FreeDOS o sin sistema), pon UNA licencia en
+     "licencia_windows" (categoria "Licencia de Windows 11 Pro") y súmala a "total_estimado".
+     La licencia cuenta DENTRO del presupuesto: si no cabe, baja el coste de las piezas o
+     elige un equipo más barato para que el total (con licencia) no pase del presupuesto.
+   - Recomienda solo opciones legales y seguras: licencia OEM o retail de Windows 11 Pro
+     vendida por Microsoft o por la propia tienda grande (no por vendedores externos).
+     "busqueda" sería por ejemplo "Windows 11 Pro OEM". Usa su precio realista en el país.
+   - En "motivo" explica en una frase que las claves de 5-20 € de webs de reventa suelen ser
+     claves por volumen o de dudosa procedencia y pueden desactivarse, y que Windows 11 Home
+     suele bastar si no necesita funciones de empresa.
+   - Si el equipo recomendado YA trae Windows, deja "licencia_windows" vacía y avisa en
+     "consejos" de que no hace falta comprar licencia (y si trae Home, que puede pasar a Pro
+     desde la tienda de Microsoft si algún día lo necesita).
+   - Si no la piden, deja "licencia_windows" vacía; puedes recordar en consejos si hará falta.
 4. Usa modelos concretos, reales, que se sigan vendiendo nuevos hoy en tiendas grandes de ese
    país (evita modelos descatalogados, que solo quedan en vendedores externos a precios raros).
    "busqueda" es el texto que alguien escribiría en el buscador de una tienda para
@@ -192,6 +215,7 @@ class Recomendacion(BaseModel):
     aviso: str = Field(description="Aviso importante para el usuario, o cadena vacía")
     resumen: str
     piezas: list[Pieza]
+    licencia_windows: list[Pieza] = Field(description="Vacía, o una licencia de Windows 11 Pro si la piden y hace falta")
     total_estimado: float
     consejos: list[str]
 
@@ -217,7 +241,8 @@ def enlaces_de_busqueda(region: str, busqueda: str) -> dict[str, str]:
     }
 
 
-def construir_peticion(tipo: str, uso: str, presupuesto: float, region: str, perifericos: bool) -> str:
+def construir_peticion(tipo: str, uso: str, presupuesto: float, region: str, perifericos: bool,
+                       licencia: bool = False) -> str:
     datos = REGIONES[region]
     lineas = [
         f"Tipo de equipo: {tipo}",
@@ -225,10 +250,15 @@ def construir_peticion(tipo: str, uso: str, presupuesto: float, region: str, per
         f"Presupuesto máximo: {presupuesto:.0f} {datos['moneda']}",
         f"País donde lo comprará: {region} (precios en {datos['moneda']})",
     ]
-    if tipo == "Torre por piezas":
+    if tipo != "Portátil":
         lineas.append(
             "Incluir monitor, teclado y ratón: " + ("sí, dentro del presupuesto" if perifericos else "no, ya los tiene")
         )
+    lineas.append(
+        "Añadir licencia de Windows 11 Pro: "
+        + ("sí, una opción legal y barata, dentro del presupuesto, salvo que el equipo ya traiga Windows"
+           if licencia else "no")
+    )
     return "\n".join(lineas)
 
 
@@ -319,7 +349,11 @@ def usar_ejemplo(texto: str) -> None:
 
 col_tipo, col_region = st.columns(2)
 with col_tipo:
-    tipo = st.radio("¿Qué buscas?", ["Torre por piezas", "Portátil"], horizontal=True)
+    tipo = st.radio(
+        "¿Qué buscas?",
+        ["Torre por piezas", "Torre ya montada", "Portátil"],
+        captions=["Eliges cada componente", "Lista para enchufar", None],
+    )
 with col_region:
     region = st.selectbox("¿Dónde lo vas a comprar?", list(REGIONES.keys()))
 
@@ -351,9 +385,13 @@ with col_presupuesto:
     )
 with col_extra:
     perifericos = False
-    if tipo == "Torre por piezas":
-        st.write("")
+    if tipo != "Portátil":
         perifericos = st.checkbox("Incluir monitor, teclado y ratón")
+    licencia = st.checkbox(
+        "Añadir licencia de Windows 11 Pro",
+        help="Te propongo una licencia legal y económica de una tienda oficial. "
+             "Si el equipo ya trae Windows, te aviso y no la sumo.",
+    )
 
 if st.button("✨ Recomiéndame un equipo", type="primary", width="stretch"):
     if len(uso.strip()) < 10:
@@ -361,7 +399,7 @@ if st.button("✨ Recomiéndame un equipo", type="primary", width="stretch"):
     elif presupuesto <= 0:
         st.warning("Indica un presupuesto mayor que cero.")
     else:
-        peticion = construir_peticion(tipo, uso, presupuesto, region, perifericos)
+        peticion = construir_peticion(tipo, uso, presupuesto, region, perifericos, licencia)
         with st.spinner("Buscando la mejor combinación para ti…"):
             try:
                 resultado, modelo_usado = pedir_recomendacion(clave, peticion)
@@ -384,14 +422,23 @@ def precio_maximo(pieza: dict) -> float:
     return max(pieza.get("precio_maximo") or 0, pieza["precio_estimado"])
 
 
+def elementos(d: dict) -> list[dict]:
+    """Lo que se muestra y se exporta: las piezas o equipos, y la licencia si la hay."""
+    return d["piezas"] + (d.get("licencia_windows") or [])
+
+
 def rango_total(res: dict) -> tuple[float, float]:
-    """Total estimado y total en el peor caso. En portátil, solo la opción recomendada."""
+    """Total estimado y total en el peor caso. En portátil o torre montada solo cuenta
+    la opción recomendada (más la licencia), no las alternativas."""
     d = res["datos"]
     total = d["total_estimado"]
-    if res["tipo"] == "Portátil" and d["piezas"]:
-        return total, max(total, precio_maximo(d["piezas"][0]))
-    # Al total le sumamos lo que puede subir cada pieza (así nunca queda por debajo)
-    return total, total + sum(precio_maximo(p) - p["precio_estimado"] for p in d["piezas"])
+    licencia = d.get("licencia_windows") or []
+    if res["tipo"] != "Torre por piezas":
+        que_suma = d["piezas"][:1] + licencia
+    else:
+        que_suma = d["piezas"] + licencia
+    # Al total le sumamos lo que puede subir cada elemento (así nunca queda por debajo)
+    return total, total + sum(precio_maximo(p) - p["precio_estimado"] for p in que_suma)
 
 
 def precio_con_rango(pieza: dict, region: str) -> str:
@@ -433,7 +480,7 @@ def crear_excel(res: dict) -> bytes:
     for celda in hoja[fila_cabecera]:
         celda.font = Font(bold=True, color="FFFFFF")
         celda.fill = PatternFill("solid", fgColor="E8474F")
-    for pieza in d["piezas"]:
+    for pieza in elementos(d):
         enlaces = enlaces_de_busqueda(reg, pieza["busqueda"])
         hoja.append([pieza["categoria"], pieza["nombre"], pieza["precio_estimado"], precio_maximo(pieza),
                      pieza["motivo"]] + list(tiendas))
@@ -442,7 +489,7 @@ def crear_excel(res: dict) -> bytes:
             celda.hyperlink = enlaces[tienda]
             celda.style = "Hyperlink"
     total, total_max = rango_total(res)
-    etiqueta = "Opción recomendada" if res["tipo"] == "Portátil" else "Total"
+    etiqueta = "Opción recomendada" if res["tipo"] != "Torre por piezas" else "Total"
     hoja.append([etiqueta, "", total, total_max])
     for celda in hoja[hoja.max_row]:
         celda.font = Font(bold=True)
@@ -456,7 +503,7 @@ def crear_excel(res: dict) -> bytes:
     hoja.append([AVISO_PRECIOS])
     for letra, ancho in zip("ABCDEFG", (22, 45, 18, 18, 60, 22, 22)):
         hoja.column_dimensions[letra].width = ancho
-    for fila in hoja.iter_rows(min_row=fila_cabecera + 1, max_row=fila_cabecera + len(d["piezas"])):
+    for fila in hoja.iter_rows(min_row=fila_cabecera + 1, max_row=fila_cabecera + len(elementos(d))):
         fila[4].alignment = Alignment(wrap_text=True, vertical="top")
     salida = BytesIO()
     libro.save(salida)
@@ -491,7 +538,7 @@ def crear_pdf(res: dict) -> bytes:
         pdf.ln(1)
         parrafo(f"Aviso: {d['aviso']}", 10, "I")
     pdf.ln(3)
-    for pieza in d["piezas"]:
+    for pieza in elementos(d):
         parrafo(f"{pieza['categoria']}: {pieza['nombre']}", 11, "B", 6)
         parrafo(f"Precio aproximado: {precio_con_rango(pieza, reg)}")
         parrafo(pieza["motivo"], 9)
@@ -502,7 +549,7 @@ def crear_pdf(res: dict) -> bytes:
         pdf.ln(7)
         pdf.set_text_color(0, 0, 0)
     total, total_max = rango_total(res)
-    etiqueta = "Opción recomendada" if res["tipo"] == "Portátil" else "Total estimado"
+    etiqueta = "Opción recomendada" if res["tipo"] != "Torre por piezas" else "Total estimado"
     rango = formatear_precio(total, reg) + (f" - {formatear_precio(total_max, reg)}" if total_max > total else "")
     parrafo(f"{etiqueta}: {rango}  (presupuesto: {formatear_precio(res['presupuesto'], reg)})", 12, "B", 7)
     if d["consejos"]:
@@ -531,7 +578,7 @@ if "resultado" in st.session_state:
         st.subheader("Mi propuesta")
         st.write(d["resumen"])
 
-        etiqueta_total = "Precio de la opción recomendada" if res["tipo"] == "Portátil" else "Total estimado"
+        etiqueta_total = "Precio de la opción recomendada" if res["tipo"] != "Torre por piezas" else "Total estimado"
         total, total_max = rango_total(res)
         diferencia = res["presupuesto"] - total
         st.metric(
@@ -544,7 +591,7 @@ if "resultado" in st.session_state:
         if total_max > total:
             st.caption(f"Según la tienda, puede llegar a {formatear_precio(total_max, reg)}.")
 
-        for pieza in d["piezas"]:
+        for pieza in elementos(d):
             with st.container(border=True):
                 izquierda, derecha = st.columns([3, 2])
                 izquierda.markdown(f"**{pieza['categoria']}** · {pieza['nombre']}")

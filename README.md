@@ -32,9 +32,9 @@ Pienso en tres personas: el estudiante de diseño que necesita un equipo para Bl
 
 ## Cómo se usa
 
-1. Elige **torre por piezas** o **portátil**, y el **país** (España, México, Argentina, Colombia, Chile, Perú o EE. UU.).
+1. Elige **torre por piezas**, **torre ya montada** (lista para enchufar) o **portátil**, y el **país** (España, México, Argentina, Colombia, Chile, Perú o EE. UU.).
 2. Cuenta **para qué lo quieres** o pulsa uno de los seis ejemplos: 🎮 Jugar · 🎨 Diseño · 👵 Casa · 💼 Oficina · 💻 Programar · 🤖 IA local.
-3. Pon tu **presupuesto** en tu moneda y, si es una torre, marca si quieres monitor, teclado y ratón.
+3. Pon tu **presupuesto** en tu moneda. Si es una torre, marca si quieres monitor, teclado y ratón, y en cualquier caso si quieres **añadir una licencia de Windows 11 Pro**: la app propone una licencia legal de tienda oficial dentro del presupuesto, y si el equipo ya trae Windows te lo dice y no la suma.
 4. Pulsa **✨ Recomiéndame un equipo**. Recibes cada pieza con su porqué y un rango de precio (el habitual y el máximo que puedes encontrar), el total frente a tu presupuesto, avisos (si no llega o si sobra) y consejos.
 5. Cada producto tiene botones **🔎 Buscar en [tienda]**, y toda la propuesta se puede **descargar en PDF o en Excel**, con los enlaces clicables.
 
@@ -62,6 +62,8 @@ Pienso en tres personas: el estudiante de diseño que necesita un equipo para Bl
 | IdeaPad Slim 3 i5 16GB 512GB | 549 € | 579-649 € | 639-699 € |
 | Vivobook 15 i5 16GB 512GB | — | 649-720 € | 649-685 € |
 | MacBook Air M2 8GB 256GB | — | 929-999 € | 939 € |
+
+**Windows, legal o nada.** Cuando se pide la licencia, el prompt solo permite licencias OEM o retail vendidas por Microsoft o por la propia tienda (en España, unos 145 €), explica por qué las claves de 5-20 € de webs de reventa pueden desactivarse, y la cuenta dentro del presupuesto. Si el portátil o la torre montada ya trae Windows, no se suma y se avisa en los consejos.
 
 **Exportar no gasta IA.** El PDF (fpdf2) y el Excel (openpyxl) se generan en el código a partir de la respuesta que ya se tiene, así que no hacen ninguna llamada a Gemini ni consumen cuota.
 
@@ -111,6 +113,13 @@ Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Ed
 | Yo, con el agente | Nuevo ejemplo 💼 Oficina: portátil de 700 € y torre de 1200 € (España) | Portátiles con 16 GB de RAM y sin gráfica dedicada (550 €, alternativas de 480 € y 650 €). En la torre avisa de que 1200 € es demasiado para ofimática y se queda en 960 € con piezas silenciosas | Regla del prompt para ofimática: gráficos integrados, 16 GB, SSD, batería y cámara; no gastar por gastar. Los 6 ejemplos van ahora en dos filas de 3 para que se lean bien |
 | **Marc, compañero de trabajo** (desde el móvil) | Portátil para la oficina: Office, fotografía básica e internet, 350 € | Le sirvió para orientarse y quizá compre la opción recomendada. El aviso de presupuesto justo le resultó útil (capturas 7 y 8). Pero el primer precio era bastante más bajo que el de la tienda y tuvo que repetir la consulta. Pidió exportar a PDF o Excel y compartir por WhatsApp o correo | Precios calibrados con datos reales, configuración exacta en cada portátil y rango "habitual – máximo". Exportación a PDF y Excel con enlaces. Compartir queda como siguiente mejora |
 | Yo, con el agente | La misma petición de Marc con 600 € y 900 €, comparando con PcComponentes | Antes de calibrar: un 25-50 % por debajo del precio real. Después: MacBook Air M2 estimado en 929-999 € (real 939 €), Vivobook en 649-720 € (real 649-685 €) | — |
+| Yo, con el agente | Nuevas opciones: torre ya montada para jugar (1000 €), torre por piezas de oficina (700 €) y portátil de oficina (700 €), todas con licencia de Windows 11 Pro | Torre montada: tres equipos premontados y licencia OEM de 145 €. Portátil: detecta que trae Windows 11 Home, no suma licencia y lo avisa. Torre por piezas: la licencia hacía pasar el total a 795 € | Regla del prompt: la licencia cuenta dentro del presupuesto. Ahora el total queda en 615 € de 700 € |
+
+### Mi feedback a un compañero
+
+Probé **Ingletin**, una app para practicar inglés de [YAHORAQUE](https://github.com/eampudia/yahoraque), el proyecto de un compañero del máster que reúne apps para gente sin conocimientos técnicos (captura 9). Le dejé esto en el debate del hito:
+
+> *"Buenas Emilio, Como te comente por whatsapp, la app esta genial. Cree una para practicar Ingles llamado "Ingletin", y a parte de añadirle ese apartado de persistencia que me comentaste, estaria genial que no descuidaras para el futuro desarrollo, la seguridad de las cuentas de los usuarios, incluyendoles un 2FA para acceder a sus aplicaciones. Tambien, estaria guay tener la posibilidad de exportar estas apps a formato movil/escritorio,etc... segun plataforma. Muy bueno!"*
 
 ## Próximos pasos
 
@@ -126,6 +135,7 @@ Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Ed
 | ![Consejos y modelo usado](docs/capturas/03_consejos.png) **3.** Consejos y modelo que respondió (aquí, el de reserva) | ![Búsqueda en PcComponentes](docs/capturas/04_busqueda_pccomponentes.webp) **4.** El botón abre la búsqueda real en PcComponentes |
 | ![Propuesta descargada en txt](docs/capturas/05_descarga_txt.webp) **5.** Primera versión de la descarga (.txt); ahora es PDF y Excel | ![Caso límite fuera de tema](docs/capturas/06_fuera_de_tema.png) **6.** Caso límite: una receta de tarta de queso, rechazada con amabilidad |
 | ![Prueba de Marc en el móvil: aviso de presupuesto](docs/capturas/07_prueba_marc_movil.webp) **7.** La prueba de Marc en el móvil: avisa de que 350 € es justo | ![Prueba de Marc: opciones de portátil](docs/capturas/08_prueba_marc_opciones.webp) **8.** Las opciones que recibió, con sus botones de búsqueda |
+| ![Feedback a un compañero en el foro](docs/capturas/09_feedback_a_companero.png) **9.** Mi feedback a la app de un compañero en el debate del hito | |
 
 ## Ejecutarla en tu ordenador
 

@@ -8,7 +8,7 @@
 - **Qué queda fuera:** precios en tiempo real y stock (los precios son orientativos), la compra en sí y el montaje del equipo. Los enlaces son búsquedas en tiendas reales, no fichas de producto.
 
 ## 2. Qué hace el producto
-1. Recoge el tipo de equipo (torre por piezas o portátil), el uso en lenguaje natural (con seis ejemplos de un clic: jugar, diseño, casa, oficina, programar e IA local), el presupuesto y el país.
+1. Recoge el tipo de equipo (torre por piezas, torre ya montada o portátil), si quiere añadir una licencia de Windows 11 Pro, el uso en lenguaje natural (con seis ejemplos de un clic: jugar, diseño, casa, oficina, programar e IA local), el presupuesto y el país.
 2. Propone con Gemini una torre pieza a pieza o 2-3 portátiles (con su configuración exacta), con un rango de precio (habitual – máximo), el motivo de cada elección, el total y consejos.
 3. Da botones para buscar cada producto en tiendas del país elegido y permite descargar la propuesta en PDF o Excel con los enlaces clicables, sin gastar llamadas a la IA.
 
@@ -45,6 +45,9 @@ Países y tiendas: España (PcComponentes, Amazon.es), México (Mercado Libre, A
 | Portátil, "estudiante de diseño gráfico", 18.000 MXN, México | 2 o 3 portátiles en MXN ordenados por recomendación, botones de Mercado Libre y Amazon México |
 | Torre, ejemplo 🤖 IA local, 1500 €, España | Gráfica NVIDIA con 16 GB de VRAM o más, 32 GB de RAM, SSD NVMe, y una frase sobre qué tamaño de modelo podrá mover (ej. 14B cuantizado a 4 bits) |
 | Portátil de oficina (Office, fotografía básica, internet), 600-900 €, España | Configuración exacta de cada portátil y precio habitual a no más de un 10 % del que muestra la búsqueda en PcComponentes (comprobado: MacBook Air M2 929-999 € frente a 939 € reales) |
+| Torre ya montada para jugar, 1000 €, España | 2 o 3 equipos premontados de tiendas del país (con CPU, RAM, SSD y gráfica en el nombre), indicando si traen Windows |
+| Licencia de Windows 11 Pro marcada, con un equipo sin Windows (p. ej. torre por piezas de oficina, 700 €) | Una licencia OEM/retail legal de tienda oficial (unos 145 € en España) sumada al total y dentro del presupuesto, con el aviso sobre las claves de reventa |
+| Licencia de Windows 11 Pro marcada, con un portátil que ya trae Windows | No se suma ninguna licencia y los consejos avisan de que ya viene incluido |
 | Pulsar "Descargar en PDF" o "Descargar en Excel" | Archivo con la propuesta, el total, los consejos y los enlaces de búsqueda clicables; no hace ninguna llamada a la IA |
 | Modelo principal saturado (503) o lento (más de 30 s) | Pasa solo al siguiente modelo; el usuario recibe la propuesta igualmente y el pie indica qué modelo respondió |
 | Caso límite: torre, "jugar en 4K a todo", 300 € | Aviso de que el presupuesto no llega, con un mínimo realista, y la mejor opción posible para 300 € |
