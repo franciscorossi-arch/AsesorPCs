@@ -90,8 +90,8 @@ La programé conversando con **Claude Code** (agente de programación) desde la 
 
 **Los prompts que marcaron el rumbo** (copiados tal cual):
 
-1. Elegir la idea:
-   > *"Necesito que me des ideas de que hacer, en un programa en python con IA (con key de gemini para usar en streamlit mejor) […] una app que genere presupuestos de componentes para un ordenador de torre, o incluso portatiles […] y si es posible, con enlaces de compra disponibles en su region […] Otra idea es, una app para entrenamiento […] da tu criterio de cual seria mejor, para ejecutar y ACABAR en este ultimo dia"*
+1. Plantear la idea:
+   > *"Necesito que me des ideas de que hacer, en un programa en python con IA (con key de gemini para usar en streamlit mejor) […] una app que genere presupuestos de componentes para un ordenador de torre, o incluso portatiles […] donde el usuario preguntara para que quiere el ordenador, y la IA le dara los componentes/portatil ideal, y si es posible, con enlaces de compra disponibles en su region"*
 2. Construir sin Colab:
    > *"No quiero usar colab para crear el codigo, lo quiero hacer contigo, pero si quiero usar una key de gemini con un modelo gratuito en caso de, para no gastar contigo."*
 3. Desplegar:
@@ -105,12 +105,11 @@ La programé conversando con **Claude Code** (agente de programación) desde la 
 
 | Delegado al agente | Revisado o decidido por mí |
 |---|---|
-| Comparar las dos ideas (presupuestos de PC frente a rutinas de ejercicio) | Elegí la de PC: la de ejercicio necesitaba login y base de datos y manejaba datos de salud, y no se acababa en un día |
 | Escribir `app.py`, el esquema JSON y el manejo de errores | Probé la app desplegada como usuario: caso normal, fuera de tema, enlaces y descarga |
 | Generar los enlaces por código en lugar de pedírselos a la IA | Comprobé que las búsquedas de PcComponentes y Amazon.es abren el producto correcto (capturas 4) |
 | Pruebas automáticas con Gemini simulado (429, campo vacío, falta de clave) | Detecté la lentitud de la primera consulta y pedí un modelo más rápido sin gastar |
 | Medir los modelos y montar la cadena de reserva con límite de tiempo | Pedí el ejemplo 🤖 IA local y revisé que la propuesta prioriza la VRAM |
-| Comprobar si la búsqueda de Google de Gemini entra gratis (no entra), medir el desfase de precios y calibrar el prompt | Recogí el feedback de Marc y decidí qué entraba hoy (precios y PDF/Excel) y qué quedaba como mejora (compartir) |
+| Comprobar si la búsqueda de Google de Gemini entra gratis (no entra), medir el desfase de precios y calibrar el prompt | Recogí el feedback de Marc y decidí qué entraba en esta versión (precios y PDF/Excel) y qué quedaba como mejora (compartir) |
 | Borradores de especificación, AGENTS.md y README | Cambié el nombre del repositorio y ajusté el texto final |
 
 Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Edge y LibreWolf. El servidor estaba bien (comprobado por el agente) y la causa era mi DNS, Quad9, que bloqueaba parte de la conexión con Streamlit. Al cambiar de DNS cargó a la primera.
