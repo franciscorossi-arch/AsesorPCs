@@ -145,7 +145,11 @@ Reglas:
    - En "motivo" explica en una frase que las claves de 5-20 € de webs de reventa suelen ser
      claves por volumen o de dudosa procedencia y pueden desactivarse, y que Windows 11 Home
      suele bastar si no necesita funciones de empresa.
-   - Si el equipo recomendado YA trae Windows, deja "licencia_windows" vacía y avisa en
+   - En portátiles y torres montadas, pon en "nombre" si trae "Windows 11" o "sin sistema
+     operativo". Si NO estás seguro de si el recomendado trae Windows, trátalo como si no lo
+     trajera: añade la licencia y di en su "motivo" que no hace falta comprarla si el equipo
+     que elija ya lo incluye.
+   - Si el equipo recomendado YA trae Windows (seguro), deja "licencia_windows" vacía y avisa en
      "consejos" de que no hace falta comprar licencia (y si trae Home, que puede pasar a Pro
      desde la tienda de Microsoft si algún día lo necesita).
    - Si no la piden, deja "licencia_windows" vacía; puedes recordar en consejos si hará falta.
@@ -405,7 +409,7 @@ if st.button("✨ Recomiéndame un equipo", type="primary", width="stretch"):
                 resultado, modelo_usado = pedir_recomendacion(clave, peticion)
                 st.session_state.resultado = {
                     "datos": resultado, "region": region, "tipo": tipo,
-                    "presupuesto": presupuesto, "modelo": modelo_usado,
+                    "presupuesto": presupuesto, "modelo": modelo_usado, "pidio_licencia": licencia,
                 }
             except Exception as error:  # cuota, clave, red, respuesta rara...
                 st.session_state.pop("resultado", None)
@@ -600,6 +604,10 @@ if "resultado" in st.session_state:
                 enlaces = enlaces_de_busqueda(reg, pieza["busqueda"])
                 for columna, (tienda, url) in zip(st.columns(len(enlaces)), enlaces.items()):
                     columna.link_button(f"🔎 Buscar en {tienda}", url, width="stretch")
+
+        if res.get("pidio_licencia") and not d.get("licencia_windows"):
+            st.info("🪟 No he sumado la licencia de Windows 11 Pro porque el equipo recomendado ya trae Windows. "
+                    "Compruébalo en la ficha de la tienda antes de comprar.")
 
         if d["consejos"]:
             st.subheader("Consejos")
