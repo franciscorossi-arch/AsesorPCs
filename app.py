@@ -126,10 +126,26 @@ Reglas:
    a menos. En "categoria" pon "Opción recomendada", "Alternativa más barata" o
    "Alternativa superior"; en "motivo" incluye procesador, RAM, almacenamiento, pantalla
    y gráfica. "total_estimado" es el precio de la opción recomendada.
-4. Usa modelos concretos, reales y fáciles de encontrar en tiendas de ese país.
+4. Usa modelos concretos, reales, que se sigan vendiendo nuevos hoy en tiendas grandes de ese
+   país (evita modelos descatalogados, que solo quedan en vendedores externos a precios raros).
    "busqueda" es el texto que alguien escribiría en el buscador de una tienda para
    encontrar ese producto: marca y modelo, corto, sin precio (ej. "Ryzen 5 7600").
-5. Precios ORIENTATIVOS en la moneda indicada, redondeados. No inventes enlaces.
+   En portátiles el mismo nombre comercial se vende con configuraciones de precios muy
+   distintos, así que en "nombre" y en "busqueda" incluye la configuración exacta: procesador,
+   RAM y almacenamiento (ej. "IdeaPad Slim 3 15IRH8 i5-13420H 16GB 512GB").
+5. Precios en la moneda indicada, redondeados, pensando en lo que el usuario verá al pulsar
+   la búsqueda en las tiendas de ese país:
+   - "precio_estimado": el precio habitual de venta HOY de esa configuración exacta en tiendas
+     grandes del país; no el precio de lanzamiento ni el de una oferta puntual.
+     CALIBRACIÓN IMPORTANTE: comparando tus estimaciones con PcComponentes (noviembre de 2026),
+     te quedabas entre un 25 % y un 50 % por debajo del precio real (la RAM, los SSD y los
+     portátiles han subido mucho). Ejemplos reales: Lenovo IdeaPad Slim 3 15AMN8 Ryzen 3 8GB 256GB
+     unos 499 €; IdeaPad Slim 3 i5-13420H 16GB 512GB entre 683 y 829 €. Corrige al alza tus
+     cifras con ese criterio y, si dudas, redondea hacia ARRIBA, nunca hacia abajo. Es mejor
+     que el usuario encuentre el producto algo más barato que más caro.
+   - "precio_maximo": lo que puede costar en la tienda habitual más cara (suele ser un
+     10-25 % más). Debe ser mayor o igual que precio_estimado.
+   - Calcula el presupuesto con precio_estimado. No inventes enlaces.
 6. Ajústate al presupuesto (puedes pasarte como mucho un 5 %). Si con ese presupuesto
    no se puede conseguir algo razonable para ese uso, pon presupuesto_suficiente=false,
    explícalo en "aviso" diciendo qué presupuesto mínimo sería realista, y propón igualmente
@@ -165,7 +181,8 @@ class Pieza(BaseModel):
     categoria: str = Field(description="Ej. 'Procesador' o 'Opción recomendada'")
     nombre: str = Field(description="Marca y modelo concretos")
     busqueda: str = Field(description="Texto corto para buscarlo en una tienda")
-    precio_estimado: float = Field(description="Precio orientativo en la moneda indicada")
+    precio_estimado: float = Field(description="Precio habitual hoy en tiendas del país, en la moneda indicada")
+    precio_maximo: float = Field(description="Precio en la tienda habitual más cara (>= precio_estimado)")
     motivo: str = Field(description="Por qué esta pieza, en una o dos frases sencillas")
 
 
@@ -362,20 +379,140 @@ if st.button("✨ Recomiéndame un equipo", type="primary", width="stretch"):
 # --------------------------------------------------------------------------
 # Resultado
 # --------------------------------------------------------------------------
-def texto_para_descargar(res: dict) -> str:
+def precio_maximo(pieza: dict) -> float:
+    """El máximo nunca puede ser menor que el estimado (por si la IA se equivoca)."""
+    return max(pieza.get("precio_maximo") or 0, pieza["precio_estimado"])
+
+
+def rango_total(res: dict) -> tuple[float, float]:
+    """Total estimado y total en el peor caso. En portátil, solo la opción recomendada."""
+    d = res["datos"]
+    total = d["total_estimado"]
+    if res["tipo"] == "Portátil" and d["piezas"]:
+        return total, max(total, precio_maximo(d["piezas"][0]))
+    # Al total le sumamos lo que puede subir cada pieza (así nunca queda por debajo)
+    return total, total + sum(precio_maximo(p) - p["precio_estimado"] for p in d["piezas"])
+
+
+def precio_con_rango(pieza: dict, region: str) -> str:
+    estimado, maximo = pieza["precio_estimado"], precio_maximo(pieza)
+    if maximo > estimado:
+        return f"{formatear_precio(estimado, region)} – {formatear_precio(maximo, region)}"
+    return formatear_precio(estimado, region)
+
+
+AVISO_PRECIOS = (
+    "Precios orientativos generados con IA: el primero es el habitual en tiendas grandes y el segundo "
+    "lo que puede costar en la más cara. Comprueba el precio real y la compatibilidad antes de comprar."
+)
+
+
+def crear_excel(res: dict) -> bytes:
+    """Hoja de cálculo con la propuesta y los enlaces clicables (no gasta llamadas a la IA)."""
+    from io import BytesIO
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+
     d, reg = res["datos"], res["region"]
-    lineas = [f"Asesor de PC · {res['tipo']} · {reg}", "", d["resumen"], ""]
+    moneda = REGIONES[reg]["moneda"]
+    tiendas = list(REGIONES[reg]["tiendas"].keys())
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = "Propuesta"
+    hoja.append([f"AsesorPCs · {res['tipo']} · {reg}"])
+    hoja["A1"].font = Font(bold=True, size=14)
+    hoja.append([d["resumen"]])
     if d["aviso"]:
-        lineas += [f"Aviso: {d['aviso']}", ""]
-    for p in d["piezas"]:
-        lineas.append(f"- {p['categoria']}: {p['nombre']} · {formatear_precio(p['precio_estimado'], reg)}")
-        lineas.append(f"  {p['motivo']}")
-        for tienda, url in enlaces_de_busqueda(reg, p["busqueda"]).items():
-            lineas.append(f"  {tienda}: {url}")
-    lineas += ["", f"Total estimado: {formatear_precio(d['total_estimado'], reg)}", "", "Consejos:"]
-    lineas += [f"- {c}" for c in d["consejos"]]
-    lineas += ["", "Precios orientativos generados con IA. Comprueba precio y compatibilidad antes de comprar."]
-    return "\n".join(lineas)
+        hoja.append([f"Aviso: {d['aviso']}"])
+    hoja.append([])
+    cabecera = ["Categoría", "Producto", f"Precio habitual ({moneda})", f"Precio máximo ({moneda})", "Por qué"]
+    cabecera += [f"Buscar en {t}" for t in tiendas]
+    hoja.append(cabecera)
+    fila_cabecera = hoja.max_row
+    for celda in hoja[fila_cabecera]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill("solid", fgColor="E8474F")
+    for pieza in d["piezas"]:
+        enlaces = enlaces_de_busqueda(reg, pieza["busqueda"])
+        hoja.append([pieza["categoria"], pieza["nombre"], pieza["precio_estimado"], precio_maximo(pieza),
+                     pieza["motivo"]] + list(tiendas))
+        for i, tienda in enumerate(tiendas):
+            celda = hoja.cell(row=hoja.max_row, column=6 + i)
+            celda.hyperlink = enlaces[tienda]
+            celda.style = "Hyperlink"
+    total, total_max = rango_total(res)
+    etiqueta = "Opción recomendada" if res["tipo"] == "Portátil" else "Total"
+    hoja.append([etiqueta, "", total, total_max])
+    for celda in hoja[hoja.max_row]:
+        celda.font = Font(bold=True)
+    hoja.append([f"Presupuesto: {res['presupuesto']:.0f} {moneda}"])
+    hoja.append([])
+    hoja.append(["Consejos"])
+    hoja[f"A{hoja.max_row}"].font = Font(bold=True)
+    for consejo in d["consejos"]:
+        hoja.append([f"• {consejo}"])
+    hoja.append([])
+    hoja.append([AVISO_PRECIOS])
+    for letra, ancho in zip("ABCDEFG", (22, 45, 18, 18, 60, 22, 22)):
+        hoja.column_dimensions[letra].width = ancho
+    for fila in hoja.iter_rows(min_row=fila_cabecera + 1, max_row=fila_cabecera + len(d["piezas"])):
+        fila[4].alignment = Alignment(wrap_text=True, vertical="top")
+    salida = BytesIO()
+    libro.save(salida)
+    return salida.getvalue()
+
+
+def _latin1(texto: str) -> str:
+    """Las fuentes básicas del PDF solo admiten latin-1: cambiamos lo que no cabe."""
+    cambios = {"€": "EUR", "–": "-", "—": "-", "“": '"', "”": '"', "‘": "'", "’": "'", "…": "...", "•": "-"}
+    for viejo, nuevo in cambios.items():
+        texto = texto.replace(viejo, nuevo)
+    return texto.encode("latin-1", "ignore").decode("latin-1")
+
+
+def crear_pdf(res: dict) -> bytes:
+    """PDF de la propuesta con enlaces clicables (no gasta llamadas a la IA)."""
+    from fpdf import FPDF
+
+    d, reg = res["datos"], res["region"]
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    ancho = pdf.w - pdf.l_margin - pdf.r_margin
+
+    def parrafo(texto: str, tam: int = 10, estilo: str = "", alto: float = 5) -> None:
+        pdf.set_font("Helvetica", estilo, tam)
+        pdf.multi_cell(ancho, alto, _latin1(texto), new_x="LMARGIN", new_y="NEXT")
+
+    parrafo(f"AsesorPCs - {res['tipo']} - {reg}", 16, "B", 8)
+    parrafo(d["resumen"])
+    if d["aviso"]:
+        pdf.ln(1)
+        parrafo(f"Aviso: {d['aviso']}", 10, "I")
+    pdf.ln(3)
+    for pieza in d["piezas"]:
+        parrafo(f"{pieza['categoria']}: {pieza['nombre']}", 11, "B", 6)
+        parrafo(f"Precio aproximado: {precio_con_rango(pieza, reg)}")
+        parrafo(pieza["motivo"], 9)
+        pdf.set_font("Helvetica", "U", 9)
+        pdf.set_text_color(30, 90, 200)
+        for tienda, url in enlaces_de_busqueda(reg, pieza["busqueda"]).items():
+            pdf.cell(45, 5, _latin1(f"Buscar en {tienda}"), link=url)
+        pdf.ln(7)
+        pdf.set_text_color(0, 0, 0)
+    total, total_max = rango_total(res)
+    etiqueta = "Opción recomendada" if res["tipo"] == "Portátil" else "Total estimado"
+    rango = formatear_precio(total, reg) + (f" - {formatear_precio(total_max, reg)}" if total_max > total else "")
+    parrafo(f"{etiqueta}: {rango}  (presupuesto: {formatear_precio(res['presupuesto'], reg)})", 12, "B", 7)
+    if d["consejos"]:
+        pdf.ln(2)
+        parrafo("Consejos", 12, "B", 7)
+        for consejo in d["consejos"]:
+            parrafo(f"- {consejo}")
+    pdf.ln(3)
+    parrafo(AVISO_PRECIOS, 8, "I", 4)
+    return bytes(pdf.output())
 
 
 if "resultado" in st.session_state:
@@ -395,21 +532,24 @@ if "resultado" in st.session_state:
         st.write(d["resumen"])
 
         etiqueta_total = "Precio de la opción recomendada" if res["tipo"] == "Portátil" else "Total estimado"
-        diferencia = res["presupuesto"] - d["total_estimado"]
+        total, total_max = rango_total(res)
+        diferencia = res["presupuesto"] - total
         st.metric(
             etiqueta_total,
-            formatear_precio(d["total_estimado"], reg),
+            formatear_precio(total, reg),
             delta=(f"te sobran {formatear_precio(diferencia, reg)}" if diferencia >= 0
                    else f"te pasas {formatear_precio(-diferencia, reg)}"),
             delta_color="normal" if diferencia >= 0 else "inverse",
         )
+        if total_max > total:
+            st.caption(f"Según la tienda, puede llegar a {formatear_precio(total_max, reg)}.")
 
         for pieza in d["piezas"]:
             with st.container(border=True):
-                izquierda, derecha = st.columns([4, 1])
+                izquierda, derecha = st.columns([3, 2])
                 izquierda.markdown(f"**{pieza['categoria']}** · {pieza['nombre']}")
                 izquierda.caption(pieza["motivo"])
-                derecha.markdown(f"**{formatear_precio(pieza['precio_estimado'], reg)}**")
+                derecha.markdown(f"**{precio_con_rango(pieza, reg)}**")
                 enlaces = enlaces_de_busqueda(reg, pieza["busqueda"])
                 for columna, (tienda, url) in zip(st.columns(len(enlaces)), enlaces.items()):
                     columna.link_button(f"🔎 Buscar en {tienda}", url, width="stretch")
@@ -419,15 +559,17 @@ if "resultado" in st.session_state:
             for consejo in d["consejos"]:
                 st.markdown(f"- {consejo}")
 
-        st.download_button(
-            "📄 Descargar la propuesta",
-            data=texto_para_descargar(res),
-            file_name="propuesta_ordenador.txt",
-            mime="text/plain",
-            width="stretch",
-        )
-        st.caption(
-            "⚠️ Precios orientativos generados con IA: pueden variar según la tienda y el día. "
-            "Los botones abren una búsqueda en la tienda; comprueba el precio y que todo sea compatible antes de comprar. "
-            f"Modelo usado: {res['modelo']}."
-        )
+        st.write("**Llévate la propuesta:**")
+        col_pdf, col_excel = st.columns(2)
+        try:
+            col_pdf.download_button("📄 Descargar en PDF", data=crear_pdf(res), file_name="propuesta_ordenador.pdf",
+                                    mime="application/pdf", width="stretch")
+        except Exception:  # un carácter raro no debe romper la app
+            col_pdf.caption("No he podido generar el PDF de esta propuesta. Prueba con el Excel.")
+        try:
+            col_excel.download_button(
+                "📊 Descargar en Excel", data=crear_excel(res), file_name="propuesta_ordenador.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", width="stretch")
+        except Exception:
+            col_excel.caption("No he podido generar el Excel de esta propuesta. Prueba con el PDF.")
+        st.caption(f"⚠️ {AVISO_PRECIOS} Los botones abren una búsqueda en la tienda. Modelo usado: {res['modelo']}.")

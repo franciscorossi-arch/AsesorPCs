@@ -2,3 +2,5 @@ streamlit
 google-genai
 pydantic
 httpx
+fpdf2
+openpyxl

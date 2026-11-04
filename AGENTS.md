@@ -11,6 +11,8 @@ Una app que ayuda a personas sin conocimientos técnicos a elegir un ordenador (
 - IA: API de Gemini con el SDK `google-genai`. Los modelos están en la lista `MODELOS` de `app.py`, en orden de preferencia; se pasa al siguiente ante un 429, 404 o 5xx, o si se supera `TIEMPO_MAXIMO_MS` (30 s). Ese orden sale de mediciones reales: no cambiarlo sin medir.
 - Gemini devuelve JSON con la forma de las clases `Pieza` y `Recomendacion` (pydantic), usando `response_schema`.
 - **Los enlaces de compra no los genera la IA**: se construyen en `enlaces_de_busqueda()` como búsquedas en las tiendas de `REGIONES`. La IA solo devuelve el texto de búsqueda (`busqueda`).
+- Precios: cada `Pieza` trae `precio_estimado` y `precio_maximo`; la regla 5 del `SYSTEM_PROMPT` lleva una calibración con precios reales de PcComponentes (04/11/2026). Si cambias el modelo, vuelve a comparar precios con la tienda.
+- Exportación: `crear_pdf()` (fpdf2, solo latin-1: pasa el texto por `_latin1()`) y `crear_excel()` (openpyxl). No llaman a la IA.
 - Archivos: `app.py` (toda la app), `requirements.txt`, `README.md`, `especificacion.md` y este fichero.
 - La especificación completa está en [especificacion.md](especificacion.md).
 
@@ -19,7 +21,8 @@ Una app que ayuda a personas sin conocimientos técnicos a elegir un ordenador (
 - Cada llamada a la API va dentro de `try/except` y muestra un mensaje claro y sin jerga (`mensaje_de_error()`). El detalle técnico va solo en un desplegable.
 - Textos de la interfaz en español, sencillos, pensados para alguien sin conocimientos técnicos.
 - Nunca pedir a la IA URLs ni mostrar enlaces inventados por ella.
-- Los precios se presentan siempre como orientativos.
+- Los precios se presentan siempre como orientativos y como rango (habitual – máximo).
+- No uses la búsqueda de Google de Gemini (grounding): no entra en la capa gratuita y el proyecto debe costar cero.
 - Cambios pequeños: uno por petición. Al terminar, explica qué has cambiado y por qué.
 - Si añades una librería, añádela también a `requirements.txt` y dilo.
 - No uses datos personales reales. Para probar, inventa ejemplos.
