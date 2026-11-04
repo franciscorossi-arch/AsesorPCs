@@ -94,6 +94,10 @@ EJEMPLOS = {
     "🎮 Jugar": "Jugar a juegos actuales en 1080p con buena fluidez y hacer algún directo en Twitch de vez en cuando.",
     "🎨 Diseño": "Soy estudiante de diseño gráfico: uso Photoshop, Illustrator y estoy empezando con Blender.",
     "👵 Casa": "Para una persona mayor: navegar, ver vídeos, videollamadas con la familia y algo de ofimática. Que sea silencioso y fácil.",
+    "💼 Oficina": (
+        "Para trabajar: Word, Excel y PowerPoint, correo, videollamadas por Teams o Zoom y el navegador "
+        "con muchas pestañas. Que sea fiable, silencioso y que dure años."
+    ),
     "💻 Programar": "Programar, tener muchas pestañas abiertas, Docker y alguna máquina virtual. Lo llevaré a clase.",
     "🤖 IA local": (
         "Quiero ejecutar modelos de IA (LLM) en mi propio ordenador con Ollama o LM Studio, "
@@ -137,7 +141,11 @@ Reglas:
 7. "resumen": 2 o 3 frases explicando la idea general de la propuesta para ese uso.
    "consejos": de 2 a 4 consejos prácticos y breves (ej. qué mejorar en el futuro,
    si hace falta comprar Windows, qué revisar antes de comprar).
-8. IA local (ejecutar LLM o agentes en el propio ordenador con Ollama, LM Studio, llama.cpp...):
+8. Ofimática o trabajo: no hace falta tarjeta gráfica dedicada (usa procesadores con gráficos
+   integrados), pero sí 16 GB de RAM, SSD de 512 GB o más y, en portátil, buena batería,
+   buen teclado, pantalla IPS y cámara/micrófono decentes para videollamadas. Prioriza
+   fiabilidad y silencio; si el presupuesto sobra, dilo y no gastes por gastar.
+9. IA local (ejecutar LLM o agentes en el propio ordenador con Ollama, LM Studio, llama.cpp...):
    lo que más importa es la memoria de la tarjeta gráfica (VRAM), porque el modelo tiene que
    caber en ella. Prioriza una gráfica NVIDIA (CUDA es lo más compatible) con la mayor VRAM que
    permita el presupuesto: 12 GB como mínimo razonable, 16 GB o más para modelos de 14B o más.
@@ -300,9 +308,12 @@ with col_region:
 
 datos_region = REGIONES[region]
 st.write("**¿Para qué lo vas a usar?** Cuéntalo con tus palabras, o pulsa un ejemplo:")
-columnas_ejemplo = st.columns(len(EJEMPLOS))
-for columna, (etiqueta, texto) in zip(columnas_ejemplo, EJEMPLOS.items()):
-    columna.button(etiqueta, on_click=usar_ejemplo, args=(texto,), width="stretch")
+BOTONES_POR_FILA = 3
+lista_ejemplos = list(EJEMPLOS.items())
+for inicio in range(0, len(lista_ejemplos), BOTONES_POR_FILA):
+    fila = lista_ejemplos[inicio:inicio + BOTONES_POR_FILA]
+    for columna, (etiqueta, texto) in zip(st.columns(BOTONES_POR_FILA), fila):
+        columna.button(etiqueta, on_click=usar_ejemplo, args=(texto,), width="stretch")
 
 uso = st.text_area(
     "Uso del ordenador",

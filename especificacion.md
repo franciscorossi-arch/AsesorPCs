@@ -8,7 +8,7 @@
 - **Qué queda fuera:** precios en tiempo real y stock (los precios son orientativos), la compra en sí y el montaje del equipo. Los enlaces son búsquedas en tiendas reales, no fichas de producto.
 
 ## 2. Qué hace el producto
-1. Recoge el tipo de equipo (torre por piezas o portátil), el uso en lenguaje natural (con cinco ejemplos de un clic: jugar, diseño, casa, programar e IA local), el presupuesto y el país.
+1. Recoge el tipo de equipo (torre por piezas o portátil), el uso en lenguaje natural (con seis ejemplos de un clic: jugar, diseño, casa, oficina, programar e IA local), el presupuesto y el país.
 2. Propone con Gemini una torre pieza a pieza o 2-3 portátiles, con precio orientativo, el motivo de cada elección, el total y consejos.
 3. Da botones para buscar cada producto en tiendas del país elegido y permite descargar la propuesta en un .txt.
 

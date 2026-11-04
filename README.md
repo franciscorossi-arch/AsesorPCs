@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| 🌐 **Pruébala** | https://my-app-app-franr-dhwqcrubnuucc48fqc6zk8.streamlit.app/ |
+| 🌐 **Pruébala** | https://asesorpcs.streamlit.app/ |
 | 👤 **Autor** | Francisco Gabriel Rossi |
 | 🎓 **Contexto** | Reto del módulo *Python para IA*, Máster en Inteligencia Artificial (OBS Business School) |
 | 🧰 **Stack** | Python · Streamlit Community Cloud · API de Gemini (`google-genai`) · pydantic |
@@ -33,7 +33,7 @@ Pienso en tres personas: el estudiante de diseño que necesita un equipo para Bl
 ## Cómo se usa
 
 1. Elige **torre por piezas** o **portátil**, y el **país** (España, México, Argentina, Colombia, Chile, Perú o EE. UU.).
-2. Cuenta **para qué lo quieres** o pulsa uno de los cinco ejemplos: 🎮 Jugar · 🎨 Diseño · 👵 Casa · 💻 Programar · 🤖 IA local.
+2. Cuenta **para qué lo quieres** o pulsa uno de los seis ejemplos: 🎮 Jugar · 🎨 Diseño · 👵 Casa · 💼 Oficina · 💻 Programar · 🤖 IA local.
 3. Pon tu **presupuesto** en tu moneda y, si es una torre, marca si quieres monitor, teclado y ratón.
 4. Pulsa **✨ Recomiéndame un equipo**. Recibes cada pieza con su precio y su porqué, el total frente a tu presupuesto, avisos (si no llega o si sobra) y consejos.
 5. Cada producto tiene botones **🔎 Buscar en [tienda]**, y toda la propuesta se puede **descargar en .txt**.
@@ -94,6 +94,7 @@ Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Ed
 | Yo, con el agente, en local | 4K a tope por 300 € y "receta de paella" | Avisa de que hacen falta unos 2.000 € y propone lo mejor posible; la paella la rechaza con amabilidad | Nada, cumple la especificación |
 | Yo, en la app desplegada | Torre para jugar, 1200 €, España; enlaces; descarga; "receta de tarta de queso" | La primera respuesta tardó mucho y la dio el modelo de reserva (837 €, sobraban 363 €). Enlaces y descarga correctos; tarta rechazada | Medí 5 modelos y cambié el principal a `gemini-3.5-flash` con límite de 30 s y dos reservas: 4-7 s y 1158 € de 1200 €. Añadí el ejemplo 🤖 IA local |
 | Yo, con el agente | 🤖 IA local: torre de 1500 € (España) y portátil de 30.000 MXN | Torre con RTX 4070 Ti SUPER de 16 GB, 32 GB de DDR5 y la nota "modelos de 7B y 14B cuantizados a 4 bits"; portátil con RTX 4070 | — |
+| Yo, con el agente | Nuevo ejemplo 💼 Oficina: portátil de 700 € y torre de 1200 € (España) | Portátiles con 16 GB de RAM y sin gráfica dedicada (550 €, alternativas de 480 € y 650 €). En la torre avisa de que 1200 € es demasiado para ofimática y se queda en 960 € con piezas silenciosas | Regla del prompt para ofimática: gráficos integrados, 16 GB, SSD, batería y cámara; no gastar por gastar. Los 6 ejemplos van ahora en dos filas de 3 para que se lean bien |
 | [PENDIENTE: un compañero] | | | |
 
 ## Capturas
