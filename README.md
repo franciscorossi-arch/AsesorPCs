@@ -44,6 +44,19 @@ Pienso en tres personas: el estudiante de diseño que necesita un equipo para Bl
 
 **La IA no escribe enlaces.** Si se le piden URLs, se las inventa. Por eso Gemini solo devuelve el texto de búsqueda ("Ryzen 5 7600") y es el código el que construye la búsqueda en PcComponentes, Amazon, Mercado Libre, Newegg o Google Shopping, según el país.
 
+**¿Por qué no un enlace directo a la ficha del producto?** Lo valoré. El LLM no conoce las URLs reales y las tiendas bloquean las consultas automáticas desde un servidor (PcComponentes devuelve 403 y Amazon 503), así que no hay forma gratuita y fiable de obtener la ficha exacta. Lo que sí hice fue afinar el texto de búsqueda para que lleve casi directo al producto. Medido en PcComponentes:
+
+| Búsqueda generada | Resultados |
+|---|---|
+| `Crucial P3 Plus 1TB` | 1 |
+| `MSI PRO B650M-P` | 2 |
+| `Corsair Vengeance DDR5 5600MHz 16GB` | 3 |
+| `Lenovo IdeaPad Slim 3 Ryzen 5 7520U 16GB 512GB` (con el código del procesador) | 2937 |
+| `Lenovo IdeaPad Slim 3 Ryzen 5 16GB 512GB` (con la familia, tras el cambio) | 5 |
+| `Acer Aspire 3 Ryzen 5 16GB 512GB` | 1 |
+
+Las tiendas escriben los códigos de procesador a su manera ("Ryzen 5 40" en lugar de "7520U"), y si no coinciden el buscador devuelve miles de resultados. Limitación conocida: si la IA propone una torre montada que esa tienda no vende (por ejemplo, el HP Victus 15L en PcComponentes), la búsqueda vuelve a ser amplia.
+
 **Elección de modelo con datos, no a ojo.** Medido con mi clave gratuita el 04/11/2026, con la misma consulta (torre para jugar, 1200 €):
 
 | Modelo | Tiempo | ¿Aprovecha el presupuesto? | Notas |
@@ -63,7 +76,7 @@ Pienso en tres personas: el estudiante de diseño que necesita un equipo para Bl
 | Vivobook 15 i5 16GB 512GB | — | 649-720 € | 649-685 € |
 | MacBook Air M2 8GB 256GB | — | 929-999 € | 939 € |
 
-**Windows, legal o nada.** Cuando se pide la licencia, el prompt solo permite licencias OEM o retail vendidas por Microsoft o por la propia tienda (en España, unos 145 €), explica por qué las claves de 5-20 € de webs de reventa pueden desactivarse, y la cuenta dentro del presupuesto. Si el portátil o la torre montada ya trae Windows, no se suma y se avisa en los consejos.
+**Windows, legal o nada.** Cuando se pide la licencia, el prompt solo permite licencias OEM o retail vendidas por Microsoft o por la propia tienda (en España, unos 145 €), explica por qué las claves de 5-20 € de webs de reventa pueden desactivarse, y la cuenta dentro del presupuesto. Si el portátil o la torre montada ya trae Windows, no se suma y se avisa en los consejos; además, una comprobación en el código quita la licencia si el nombre del equipo dice que trae Windows, por si la IA se equivoca. Valoré incluir claves de reventa (G2A, Eneba…) por su precio, pero las descarté: suelen ser claves por volumen u OEM revendidas fuera de su licencia, pueden desactivarse meses después y el usuario no técnico no sabría qué hacer. Para ahorrar, la app propone alternativas legales: Windows 11 Home en lugar de Pro, equipos reacondicionados profesionales que ya traen licencia, Linux gratuito para usos sencillos o usar Windows sin activar mientras decide.
 
 **Exportar no gasta IA.** El PDF (fpdf2) y el Excel (openpyxl) se generan en el código a partir de la respuesta que ya se tiene, así que no hacen ninguna llamada a Gemini ni consumen cuota.
 
@@ -115,6 +128,7 @@ Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Ed
 | Yo, con el agente | La misma petición de Marc con 600 € y 900 €, comparando con PcComponentes | Antes de calibrar: un 25-50 % por debajo del precio real. Después: MacBook Air M2 estimado en 929-999 € (real 939 €), Vivobook en 649-720 € (real 649-685 €) | — |
 | Yo, con el agente | Nuevas opciones: torre ya montada para jugar (1000 €), torre por piezas de oficina (700 €) y portátil de oficina (700 €), todas con licencia de Windows 11 Pro | Torre montada: tres equipos premontados y licencia OEM de 145 €. Portátil: detecta que trae Windows 11 Home, no suma licencia y lo avisa. Torre por piezas: la licencia hacía pasar el total a 795 € | Regla del prompt: la licencia cuenta dentro del presupuesto. Ahora el total queda en 615 € de 700 € |
 | Yo, en la app desplegada | Torre ya montada para jugar, con la licencia marcada | El modelo no sabía si el equipo traía Windows, no sumó licencia y solo dijo "revisa si lo incluye" | El nombre de cada equipo indica ahora "Windows 11" o "sin sistema operativo"; si duda, suma la licencia. Si no la suma, la app avisa de que el equipo ya trae Windows |
+| Yo, con el agente | Portátil de oficina de 450 € "ahorrando todo lo posible", con licencia | El modelo de reserva sumó la licencia aunque el portátil ya traía Windows 11 Home; la búsqueda del portátil daba 2937 resultados | Comprobación en el código que quita la licencia si el equipo ya trae Windows. Búsquedas con la familia del procesador: 5 resultados. Consejos con alternativas legales (Home, reacondicionados, Linux) en lugar de claves de reventa |
 
 ### Mi feedback a un compañero
 
@@ -125,6 +139,7 @@ Probé **Ingletin**, una app para practicar inglés de [YAHORAQUE](https://githu
 ## Próximos pasos
 
 - **Compartir la propuesta** por WhatsApp, correo o enlace (petición de Marc).
+- **Enlace directo a la ficha del producto**, con las APIs de afiliados de las tiendas (Amazon Product Advertising API, PcComponentes Afiliados), que además darían el precio real.
 - **Precio real en el momento**, con las APIs de afiliados de las tiendas o con la búsqueda de Google de Gemini en una clave de pago.
 - **Ajustar conversando**: "cámbiame la gráfica por una más barata" sin rehacer toda la propuesta.
 

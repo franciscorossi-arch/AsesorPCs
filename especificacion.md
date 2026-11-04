@@ -47,7 +47,9 @@ Países y tiendas: España (PcComponentes, Amazon.es), México (Mercado Libre, A
 | Portátil de oficina (Office, fotografía básica, internet), 600-900 €, España | Configuración exacta de cada portátil y precio habitual a no más de un 10 % del que muestra la búsqueda en PcComponentes (comprobado: MacBook Air M2 929-999 € frente a 939 € reales) |
 | Torre ya montada para jugar, 1000 €, España | 2 o 3 equipos premontados de tiendas del país (con CPU, RAM, SSD y gráfica en el nombre), indicando si traen Windows |
 | Licencia de Windows 11 Pro marcada, con un equipo sin Windows (p. ej. torre por piezas de oficina, 700 €) | Una licencia OEM/retail legal de tienda oficial (unos 145 € en España) sumada al total y dentro del presupuesto, con el aviso sobre las claves de reventa |
-| Licencia de Windows 11 Pro marcada, con un portátil que ya trae Windows | No se suma ninguna licencia y los consejos avisan de que ya viene incluido |
+| Licencia de Windows 11 Pro marcada, con un portátil que ya trae Windows | No se suma ninguna licencia (aunque la IA la ponga, el código la retira) y los consejos avisan de que ya viene incluido |
+| Usuario que quiere ahorrar en Windows | Alternativas legales en los consejos (Home, reacondicionados con licencia, Linux, Windows sin activar); nunca claves de G2A, Eneba o similares |
+| Pulsar "Buscar en PcComponentes" en un componente o portátil | La búsqueda devuelve pocos resultados (medido: 1-5) con el producto propuesto entre los primeros |
 | Pulsar "Descargar en PDF" o "Descargar en Excel" | Archivo con la propuesta, el total, los consejos y los enlaces de búsqueda clicables; no hace ninguna llamada a la IA |
 | Modelo principal saturado (503) o lento (más de 30 s) | Pasa solo al siguiente modelo; el usuario recibe la propuesta igualmente y el pie indica qué modelo respondió |
 | Caso límite: torre, "jugar en 4K a todo", 300 € | Aviso de que el presupuesto no llega, con un mínimo realista, y la mejor opción posible para 300 € |

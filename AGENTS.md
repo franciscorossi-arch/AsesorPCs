@@ -22,7 +22,8 @@ Una app que ayuda a personas sin conocimientos técnicos a elegir un ordenador (
 - Textos de la interfaz en español, sencillos, pensados para alguien sin conocimientos técnicos.
 - Nunca pedir a la IA URLs ni mostrar enlaces inventados por ella.
 - Los precios se presentan siempre como orientativos y como rango (habitual – máximo).
-- Licencias de Windows: solo legales (Microsoft o la tienda), nunca claves de reventa. Van en `licencia_windows`, aparte de `piezas`, y cuentan dentro del presupuesto.
+- Licencias de Windows: solo legales (Microsoft o la tienda), nunca claves de reventa (G2A, Eneba, Kinguin…). `quitar_licencia_si_sobra()` la retira si el equipo recomendado ya trae Windows.
+- Texto de búsqueda: en portátiles y torres montadas, la familia del procesador ("Ryzen 5"), no el código exacto ("7520U"), porque las tiendas lo escriben distinto. Van en `licencia_windows`, aparte de `piezas`, y cuentan dentro del presupuesto.
 - Tipos de equipo: "Torre por piezas" lista componentes; "Torre ya montada" y "Portátil" listan 2-3 opciones y el total es solo el de la recomendada.
 - No uses la búsqueda de Google de Gemini (grounding): no entra en la capa gratuita y el proyecto debe costar cero.
 - Cambios pequeños: uno por petición. Al terminar, explica qué has cambiado y por qué.

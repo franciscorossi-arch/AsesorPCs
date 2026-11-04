@@ -153,13 +153,28 @@ Reglas:
      "consejos" de que no hace falta comprar licencia (y si trae Home, que puede pasar a Pro
      desde la tienda de Microsoft si algún día lo necesita).
    - Si no la piden, deja "licencia_windows" vacía; puedes recordar en consejos si hará falta.
+   - Nunca recomiendes ni enlaces claves de mercados de reventa (G2A, Eneba, Kinguin y
+     similares). Si el usuario busca ahorrar, propón en "consejos" alternativas LEGALES
+     que encajen con su uso (una o dos, no todas):
+       · Windows 11 Home en lugar de Pro (más barata y suficiente para casi todo).
+       · Un equipo reacondicionado profesional (ThinkPad, Dell Latitude/OptiPlex, HP
+         EliteBook/EliteDesk) que ya trae licencia de Windows legal.
+       · Linux gratuito (Linux Mint o Ubuntu) para usos sencillos: ofimática, navegar, casa.
+       · Instalar Windows sin activar mientras decide (funciona con marca de agua y algunas
+         opciones de personalización bloqueadas).
 4. Usa modelos concretos, reales, que se sigan vendiendo nuevos hoy en tiendas grandes de ese
    país (evita modelos descatalogados, que solo quedan en vendedores externos a precios raros).
-   "busqueda" es el texto que alguien escribiría en el buscador de una tienda para
-   encontrar ese producto: marca y modelo, corto, sin precio (ej. "Ryzen 5 7600").
-   En portátiles el mismo nombre comercial se vende con configuraciones de precios muy
-   distintos, así que en "nombre" y en "busqueda" incluye la configuración exacta: procesador,
-   RAM y almacenamiento (ej. "IdeaPad Slim 3 15IRH8 i5-13420H 16GB 512GB").
+   "busqueda" es el texto que se escribe en el buscador de la tienda y debe llevar al
+   producto con los MENOS resultados posibles: marca y modelo completos tal y como los
+   anuncian las tiendas, sin precio ni palabras genéricas ("portátil", "barato", "gaming")
+   (ej. "AMD Ryzen 5 7600", "MSI B650M Gaming Plus WiFi", "Kingston NV2 1TB").
+   En portátiles y torres montadas el mismo nombre comercial se vende con configuraciones de
+   precios muy distintos: en "nombre" incluye la configuración exacta (procesador, RAM y
+   almacenamiento). En "busqueda" usa marca + gama + FAMILIA del procesador + RAM +
+   almacenamiento (ej. "Lenovo IdeaPad Slim 3 Ryzen 5 16GB 512GB", "HP Victus 15L Core i5 16GB
+   RTX 4060"). NO pongas el código exacto del procesador ("7520U", "i5-13420H") ni códigos
+   internos de modelo ("15IAH8", "TG02-1004ns"): las tiendas los escriben distinto y, si no
+   coinciden, el buscador devuelve miles de resultados (medido: 2937 frente a 5).
 5. Precios en la moneda indicada, redondeados, pensando en lo que el usuario verá al pulsar
    la búsqueda en las tiendas de ese país:
    - "precio_estimado": el precio habitual de venta HOY de esa configuración exacta en tiendas
@@ -264,6 +279,24 @@ def construir_peticion(tipo: str, uso: str, presupuesto: float, region: str, per
            if licencia else "no")
     )
     return "\n".join(lineas)
+
+
+def quitar_licencia_si_sobra(datos: dict, tipo: str) -> dict:
+    """Red de seguridad: si el portátil o la torre montada recomendada ya dice que trae
+    Windows, no tiene sentido sumar una licencia aunque la IA la haya puesto."""
+    licencia = datos.get("licencia_windows") or []
+    if not licencia or tipo == "Torre por piezas" or not datos["piezas"]:
+        return datos
+    nombre = datos["piezas"][0]["nombre"].lower()
+    if "windows" in nombre and "sin " not in nombre and "freedos" not in nombre:
+        datos = dict(datos)
+        total = datos["total_estimado"]
+        sin_licencia = total - sum(p["precio_estimado"] for p in licencia)
+        primera = datos["piezas"][0]["precio_estimado"]
+        # Solo restamos si la IA había sumado la licencia al total (si no, el total ya era correcto)
+        datos["total_estimado"] = sin_licencia if sin_licencia >= primera else max(total, primera)
+        datos["licencia_windows"] = []
+    return datos
 
 
 def mensaje_de_error(error: Exception) -> str:
@@ -407,6 +440,7 @@ if st.button("✨ Recomiéndame un equipo", type="primary", width="stretch"):
         with st.spinner("Buscando la mejor combinación para ti…"):
             try:
                 resultado, modelo_usado = pedir_recomendacion(clave, peticion)
+                resultado = quitar_licencia_si_sobra(resultado, tipo)
                 st.session_state.resultado = {
                     "datos": resultado, "region": region, "tipo": tipo,
                     "presupuesto": presupuesto, "modelo": modelo_usado, "pidio_licencia": licencia,
