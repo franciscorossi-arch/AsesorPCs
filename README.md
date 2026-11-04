@@ -130,12 +130,6 @@ Un tropiezo real del proceso: la app desplegada se quedaba cargando en Brave, Ed
 | Yo, en la app desplegada | Torre ya montada para jugar, con la licencia marcada | El modelo no sabía si el equipo traía Windows, no sumó licencia y solo dijo "revisa si lo incluye" | El nombre de cada equipo indica ahora "Windows 11" o "sin sistema operativo"; si duda, suma la licencia. Si no la suma, la app avisa de que el equipo ya trae Windows |
 | Yo, con el agente | Portátil de oficina de 450 € "ahorrando todo lo posible", con licencia | El modelo de reserva sumó la licencia aunque el portátil ya traía Windows 11 Home; la búsqueda del portátil daba 2937 resultados | Comprobación en el código que quita la licencia si el equipo ya trae Windows. Búsquedas con la familia del procesador: 5 resultados. Consejos con alternativas legales (Home, reacondicionados, Linux) en lugar de claves de reventa |
 
-### Mi feedback a un compañero
-
-Probé **Ingletin**, una app para practicar inglés de [YAHORAQUE](https://github.com/eampudia/yahoraque), el proyecto de un compañero del máster que reúne apps para gente sin conocimientos técnicos (captura 9). Le dejé esto en el debate del hito:
-
-> *"Buenas Emilio, Como te comente por whatsapp, la app esta genial. Cree una para practicar Ingles llamado "Ingletin", y a parte de añadirle ese apartado de persistencia que me comentaste, estaria genial que no descuidaras para el futuro desarrollo, la seguridad de las cuentas de los usuarios, incluyendoles un 2FA para acceder a sus aplicaciones. Tambien, estaria guay tener la posibilidad de exportar estas apps a formato movil/escritorio,etc... segun plataforma. Muy bueno!"*
-
 ## Próximos pasos
 
 - **Compartir la propuesta** por WhatsApp, correo o enlace (petición de Marc).
@@ -151,8 +145,6 @@ Probé **Ingletin**, una app para practicar inglés de [YAHORAQUE](https://githu
 | ![Consejos y modelo usado](docs/capturas/03_consejos.png) **3.** Consejos y modelo que respondió (aquí, el de reserva) | ![Búsqueda en PcComponentes](docs/capturas/04_busqueda_pccomponentes.webp) **4.** El botón abre la búsqueda real en PcComponentes |
 | ![Propuesta descargada en txt](docs/capturas/05_descarga_txt.webp) **5.** Primera versión de la descarga (.txt); ahora es PDF y Excel | ![Caso límite fuera de tema](docs/capturas/06_fuera_de_tema.png) **6.** Caso límite: una receta de tarta de queso, rechazada con amabilidad |
 | ![Prueba de Marc en el móvil: aviso de presupuesto](docs/capturas/07_prueba_marc_movil.webp) **7.** La prueba de Marc en el móvil: avisa de que 350 € es justo | ![Prueba de Marc: opciones de portátil](docs/capturas/08_prueba_marc_opciones.webp) **8.** Las opciones que recibió, con sus botones de búsqueda |
-| ![Feedback a un compañero en el foro](docs/capturas/09_feedback_a_companero.png) **9.** Mi feedback a la app de un compañero en el debate del hito | |
-
 ## Ejecutarla en tu ordenador
 
 ```bash
