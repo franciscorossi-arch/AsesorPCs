@@ -1,6 +1,6 @@
 # 🖥️ Asesor de PC
 
-**Enlace a la app:** [PENDIENTE: https://….streamlit.app]
+**Enlace a la app:** https://my-app-app-franr-dhwqcrubnuucc48fqc6zk8.streamlit.app/
 **Autor/a:** [PENDIENTE: tu nombre]
 
 ## Pitch
